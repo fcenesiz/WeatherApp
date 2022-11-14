@@ -1,79 +1,60 @@
 package com.fcenesiz.weather;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
+
+import java.util.List;
 
 public class Service {
 
     private static final String API_KEY = "ab52ec803d37e6ef4358282152bf33fa";
+    private static final String API_URL = "https://api.openweathermap.org/data/2.5/weather?";
+
     private Context ctx;
 
     public Service(Context ctx) {
         this.ctx = ctx;
     }
 
-    public void getCityId(String id) {
+    public interface OnResponseCityIdListener {
+        void onResponse(String cityId);
+        void onError(String message);
+    }
 
-        String url = "https://api.openweathermap.org/data/2.5/" +
-                "weather?q=" + id +
+    public interface OnResponseWeatherByCityListener {
+        void onResponse(List<WeatherModel> report);
+        void onError(String message);
+    }
+
+    public void getCityId(String id, OnResponseCityIdListener listener) {
+
+        String url = API_URL +
+                "q=" + id +
                 "&appid=" + API_KEY;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
+                    String cityId = "";
                     try {
-                        Toast.makeText(ctx, response.get("id").toString(), Toast.LENGTH_SHORT).show();
+                        cityId = response.get("id").toString();
+                        listener.onResponse(cityId);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 },
-                error -> {
-                    Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
-                }
+                error -> listener.onError(error.getMessage())
         );
 
         RequestSingleton.getInstance(ctx).addToRequestQueue(request);
     }
 
-    public void getWeatherBy(QueryType queryType, String data){
-
-        String query = "";
-        switch (queryType){
-            case ID:
-                query = "id";
-                break;
-            case NAME:
-                query = "q";
-                break;
-        }
-
-        String url = "https://api.openweathermap.org/data/2.5/" +
-                "weather?"+ query +"=" + data +
-                "&appid=" + API_KEY;
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    Toast.makeText(
-                            ctx,
-                            response,
-                            Toast.LENGTH_SHORT
-                    ).show();
-                },
-                error -> {
-                    //Toast.makeText(
-                    //        ctx,
-                    //        error.getMessage(),
-                    //        Toast.LENGTH_SHORT
-                    //).show();
-                }
-        );
-
-        RequestSingleton.getInstance(ctx).addToRequestQueue(stringRequest);
+    public void getWeatherByCity(QueryType queryType, String data, OnResponseWeatherByCityListener listener) {
+        // daily forecast is paid, can not implemented!
+        // for more information, visit api.openweathermap.org
     }
 
 }

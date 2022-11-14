@@ -9,13 +9,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -49,16 +43,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        String data = editTextCityIdOrName.getText().toString();
+        String text = editTextCityIdOrName.getText().toString();
         switch (view.getId()) {
             case R.id.btn_getCityId:
-                service.getCityId(data);
+                service.getCityId(text, new Service.OnResponseCityIdListener() {
+                    @Override
+                    public void onResponse(String cityId) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "cityId:" + cityId,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "error:" + message,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
                 break;
             case R.id.btn_getWeatherByCityId:
-                service.getWeatherBy(QueryType.ID, data);
+                // daily forecast is paid, can not implemented!
+                // for more information, visit api.openweathermap.org
+                service.getWeatherByCity(QueryType.ID, text, new Service.OnResponseWeatherByCityListener() {
+                    @Override
+                    public void onResponse(List<WeatherModel> report) {
+
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
                 break;
             case R.id.btn_getWeatherByCityName:
-                service.getWeatherBy(QueryType.NAME, data);
+                // daily forecast is paid, can not implemented!
+                // for more information, visit api.openweathermap.org
+                service.getWeatherByCity(QueryType.NAME, text, new Service.OnResponseWeatherByCityListener() {
+                    @Override
+                    public void onResponse(List<WeatherModel> report) {
+
+                    }
+
+                    @Override
+                    public void onError(String message) {
+
+                    }
+                });
                 break;
         }
     }
